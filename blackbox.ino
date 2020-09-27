@@ -58,13 +58,15 @@ void drawFontFaceDemo() {
   display.drawString(0, 10, "Hello world");
   display.setFont(ArialMT_Plain_24);
   display.drawString(0, 26, "Hello world");
+  display.display();
+
 }
 
 void loop() {
   drawFontFaceDemo();
   // write the buffer to the display
-  display.display();
   while ( true ) {
+  
     Serial.print(F("Temperature = "));
     Serial.print(bmp.readTemperature());
     Serial.println(" *C");
@@ -78,6 +80,16 @@ void loop() {
     Serial.println(" m");
 
     Serial.println();
-    delay(2000);
+
+    display.setFont(ArialMT_Plain_10);
+    display.drawString(0, 0, "Teplota");
+    display.drawString(50, 0, String(bmp.readTemperature()) + "*C");
+    display.drawString(0, 15, "Tlak");
+    display.drawString(50, 15, String(bmp.readPressure()) + "pA");
+    display.display();
+
+   delay(2000);
+   display.clear();
+
   }
 }
