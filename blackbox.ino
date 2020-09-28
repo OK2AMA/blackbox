@@ -6,12 +6,14 @@
 
    pinout:
    LCD 5110 / GPIO
-   RST   D23
-   CE    D1/txd
-   Dout  D19
-   Din   D18
-   CLK   D5
-   BCKL  D2
+   1 RST   D23
+   2 CE    D1/txd
+   3 DC    D19
+   4 DIN   D18
+   5 CLK   D5
+   6 VCC
+   7 DL    D2
+   8 GND
 
    Rotary encoder
    left  D17
@@ -28,6 +30,10 @@
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+
+Adafruit_PCD8544 displayLCD = Adafruit_PCD8544(5, 18, 19, 32, 23);
 SSD1306Wire display(0x3c, SDA, SCL);   // ADDRESS, SDA, SCL  -  SDA and SCL usually populate automatically based on your board's pins_arduino.h
 Adafruit_BMP280 bmp; // I2C
 
@@ -38,6 +44,19 @@ void setup() {
   display.init();
   display.flipScreenVertically();
   display.setFont(ArialMT_Plain_10);
+
+  displayLCD.begin();
+  displayLCD.setRotation(2);
+  displayLCD.setContrast(50);
+  displayLCD.display(); // show splashscreen
+  displayLCD.clearDisplay();   // clears the screen and buffer
+  displayLCD.drawPixel(10, 10, BLACK);
+  displayLCD.display();
+  displayLCD.setTextSize(1);
+  displayLCD.setTextColor(BLACK);
+  displayLCD.setCursor(20,20);
+  displayLCD.println("Hello, world!");
+  displayLCD.display();
 
   bmp.begin(0x76);
   /* Default settings from datasheet. */
@@ -59,6 +78,8 @@ void drawFontFaceDemo() {
   display.setFont(ArialMT_Plain_24);
   display.drawString(0, 26, "Hello world");
   display.display();
+  display.clear();
+
 
 }
 
@@ -83,9 +104,9 @@ void loop() {
 
     display.setFont(ArialMT_Plain_10);
     display.drawString(0, 0, "Teplota");
-    display.drawString(50, 0, String(bmp.readTemperature()) + "*C");
+    display.drawString(45, 0, String(bmp.readTemperature()) + " *C");
     display.drawString(0, 15, "Tlak");
-    display.drawString(50, 15, String(bmp.readPressure()) + "pA");
+    display.drawString(45, 15, String(bmp.readPressure()/100) + " hPa");
     display.display();
 
    delay(2000);
