@@ -32,6 +32,10 @@
 #include <TinyGPS.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include "WiFi.h"
+
+const char* ssid = "OpenWrt";
+const char* password =  "fialkapodlampou";
 
 Adafruit_PCD8544 displayLCD = Adafruit_PCD8544(5, 18, 19, 32, 23);
 SSD1306Wire display(0x3c, SDA, SCL);   // ADDRESS, SDA, SCL  -  SDA and SCL usually populate automatically based on your board's pins_arduino.h
@@ -41,10 +45,12 @@ HardwareSerial hwSerial_2(2);
 
 #define RX2 16
 #define TX2 17
+#define bulh_const (3.3*((15+20)/20))/4096
 
 void setup() {
   Serial.begin(115200);
-  Serial.println();
+  WiFi.begin(ssid, password);
+ 
   display.init();
   display.flipScreenVertically();
   display.setFont(ArialMT_Plain_10);
@@ -95,7 +101,7 @@ void drawFontFaceDemo() {
 
 void loop() {
   bool newData = false;
-  unsigned long chars;
+  unsigned long chars, age, date = 0;
   unsigned short sentences, failed;
 
   drawFontFaceDemo();
@@ -109,6 +115,8 @@ void loop() {
     display.drawString(45, 0, String(bmp.readTemperature()) + " *C");
     display.drawString(0, 15, "Tlak");
     display.drawString(45, 15, String(bmp.readPressure() / 100) + " hPa");
+    display.drawString(0, 30, "Napeti: " + String(analogRead(13) * 0.00141)  + " V");
+    
     display.display();
 
     delay(1);
@@ -141,17 +149,20 @@ void loop() {
 
       displayLCD.setCursor(0, 0);
       displayLCD.println("GPS receiver:");
-     // displayLCD.setCursor(0, 9);
       displayLCD.print("La:");
       displayLCD.println(flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 5);
-      //displayLCD.setCursor(0, 18);
-      displayLCD.print(" Lo:");
+      displayLCD.print("Lo:");
       displayLCD.println(flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 5);
-     // displayLCD.setCursor(0, 27);
-      displayLCD.print(" SAT=");
+      displayLCD.print("ST=");
       displayLCD.print(gps.satellites() == TinyGPS::GPS_INVALID_SATELLITES ? 0 : gps.satellites());
-      displayLCD.print(" ALT=");
-      displayLCD.print(gps.f_altitude() == TinyGPS::GPS_INVALID_F_ALTITUDE ? 0 : gps.f_altitude());
+      displayLCD.print(" AL=");
+      displayLCD.println(gps.f_altitude() == TinyGPS::GPS_INVALID_F_ALTITUDE ? 0 : gps.f_altitude(),1);
+      displayLCD.print("SPD=");
+      displayLCD.print(gps.f_speed_kmph() == TinyGPS::GPS_INVALID_F_ALTITUDE ? 0 : gps.f_speed_kmph(),1);
+      displayLCD.print("SPD=");
+      displayLCD.print(gps.f_speed_kmph() == TinyGPS::GPS_INVALID_F_ALTITUDE ? 0 : gps.f_speed_kmph(),1);
+
+
 
       displayLCD.display();
       displayLCD.clearDisplay();
